@@ -3,11 +3,13 @@ from fastapi import APIRouter, Request, Query, HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from src.core.config import settings
+from src.core.database import DBSession
 from src.core.logging import get_logger
 from src.schemas.responses import create_error_response, create_success_response
 from src.schemas.whatsapp import WhatsAppWebhook
 from src.services.conversation_handler import conversation_handler
 from src.services.message_parser import MessageParser
+from src.services.pix_handler import pix_handler
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/webhooks/whatsapp", tags=["WhatsApp"])
@@ -79,6 +81,7 @@ async def verify_webhook(
 async def receive_webhook(
     request: Request,
     webhook: WhatsAppWebhook,
+    db: DBSession,
 ) -> JSONResponse:
     """
     Receive WhatsApp webhook messages.
@@ -158,8 +161,39 @@ async def receive_webhook(
                 action=result.get("action"),
             )
 
-            # TODO: If action is "generate_pix", trigger PIX generation
-            # This will be implemented in ÉPICO 4
+            # If action is "generate_pix", trigger PIX generation
+            if result.get("action") == "generate_pix" and result.get("data"):
+                data = result["data"]
+                try:
+                    await pix_handler.generate_and_send_pix(
+                        db=db,
+                        phone=data["phone"],
+                        name=data["name"],
+                        condo=data["condo"],
+                        block=data["block"],
+                        apartment=data["apartment"],
+                        amount=data["amount"],
+                        request_id=request_id,
+                    )
+
+                    logger.info(
+                        "pix_generated_for_conversation",
+                        request_id=request_id,
+                        phone=phone,
+                    )
+
+                    # Reset conversation state after successful PIX generation
+                    conversation_handler.reset_state(phone)
+
+                except Exception as pix_error:
+                    logger.error(
+                        "pix_generation_failed_in_webhook",
+                        request_id=request_id,
+                        phone=phone,
+                        error=str(pix_error),
+                        exc_info=True,
+                    )
+                    # Error message already sent by pix_handler
 
             processed_count += 1
 
