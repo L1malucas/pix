@@ -10,6 +10,8 @@ services:
       - .env
     volumes:
       - ./src:/app/src
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
       - ./logs:/app/logs
     depends_on:
       db:
