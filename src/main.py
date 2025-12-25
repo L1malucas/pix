@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from src.api import whatsapp
 from src.core.config import settings
 from src.core.logging import configure_logging, get_logger
 from src.core.middleware import RequestIDMiddleware
@@ -54,6 +55,9 @@ app.add_middleware(
 
 # Add request ID middleware
 app.add_middleware(RequestIDMiddleware)
+
+# Include routers
+app.include_router(whatsapp.router)
 
 
 # Health check endpoint
