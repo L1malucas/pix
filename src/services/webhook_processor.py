@@ -9,6 +9,7 @@ from src.models.client import Client
 from src.models.payment import Payment
 from src.services.mercadopago_service import mercadopago_service
 from src.services.payment_service import payment_service
+from src.services.sheets_service import sheets_service
 from src.services.whatsapp import whatsapp_service
 
 logger = get_logger(__name__)
@@ -105,12 +106,13 @@ class WebhookProcessor:
 
             if mp_status == "approved" and payment.status != "approved":
                 # Payment approved
+                paid_at = datetime.utcnow()
                 payment_service.update_status(
                     db,
                     payment,
                     status="approved",
                     mp_payment_id=mp_payment_id,
-                    paid_at=datetime.utcnow(),
+                    paid_at=paid_at,
                 )
                 updated = True
 
@@ -120,6 +122,28 @@ class WebhookProcessor:
                     payment_id=payment.id,
                     mp_payment_id=mp_payment_id,
                 )
+
+                # Update Google Sheets
+                try:
+                    sheets_service.update_row_by_request_id(
+                        request_id_value=payment.request_id,
+                        status="approved",
+                        paid_at=paid_at,
+                        tracking_request_id=request_id,
+                    )
+                    logger.info(
+                        "payment_updated_in_sheets",
+                        request_id=request_id,
+                        payment_id=payment.id,
+                    )
+                except Exception as sheets_error:
+                    logger.error(
+                        "failed_to_update_sheets",
+                        request_id=request_id,
+                        error=str(sheets_error),
+                        exc_info=True,
+                    )
+                    # Don't fail the entire operation if sheets fails
 
                 # Send confirmation to client
                 await self._send_payment_confirmation(

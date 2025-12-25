@@ -10,6 +10,7 @@ from src.schemas.payment import PaymentCreate
 from src.services.client_service import client_service
 from src.services.mercadopago_service import mercadopago_service
 from src.services.payment_service import payment_service
+from src.services.sheets_service import sheets_service
 from src.services.whatsapp import whatsapp_service
 
 logger = get_logger(__name__)
@@ -145,7 +146,36 @@ class PIXHandler:
                 mp_payment_id=mp_payment_id,
             )
 
-            # 9. Send PIX code via WhatsApp
+            # 9. Register in Google Sheets
+            try:
+                sheets_service.create_payment_row(
+                    request_id=request_id,
+                    name=name,
+                    phone=phone,
+                    condo=condo,
+                    block=block,
+                    apartment=apartment,
+                    month_ref=month_ref,
+                    amount=amount,
+                    status="pending",
+                    mp_payment_id=mp_payment_id,
+                    tracking_request_id=request_id,
+                )
+                logger.info(
+                    "payment_registered_in_sheets",
+                    request_id=request_id,
+                    payment_id=payment.id,
+                )
+            except Exception as sheets_error:
+                logger.error(
+                    "failed_to_register_in_sheets",
+                    request_id=request_id,
+                    error=str(sheets_error),
+                    exc_info=True,
+                )
+                # Don't fail the entire operation if sheets fails
+
+            # 10. Send PIX code via WhatsApp
             pix_message = (
                 f"✅ PIX gerado com sucesso!\n\n"
                 f"💰 Valor: R$ {amount:.2f}\n"

@@ -136,10 +136,14 @@ uvicorn src.main:app --reload
 
 ### Google Sheets
 
-1. Acesse: https://console.cloud.google.com/apis/credentials
-2. Crie credenciais OAuth 2.0
-3. Baixe o arquivo JSON e salve como `credentials.json`
-4. Crie uma planilha e obtenha o ID da URL
+Veja o guia completo em: [docs/GOOGLE_SHEETS_SETUP.md](docs/GOOGLE_SHEETS_SETUP.md)
+
+Resumo:
+1. Crie um projeto no Google Cloud Console
+2. Habilite a Google Sheets API
+3. Crie um Service Account e baixe o JSON
+4. Crie uma planilha e compartilhe com o service account
+5. Execute: `python scripts/setup_sheets.py`
 
 ## Uso
 
@@ -243,13 +247,13 @@ Todas as respostas seguem o formato:
 ## Roadmap
 
 - [x] ÉPICO 1 — Infraestrutura Base
-- [ ] ÉPICO 2 — Bot WhatsApp
-- [ ] ÉPICO 3 — Cadastro de Cliente
-- [ ] ÉPICO 4 — Geração de PIX
-- [ ] ÉPICO 5 — Webhooks Mercado Pago
-- [ ] ÉPICO 6 — Google Sheets
+- [x] ÉPICO 2 — Modelos de Banco de Dados
+- [x] ÉPICO 3 — Bot WhatsApp
+- [x] ÉPICO 4 — Geração de PIX
+- [x] ÉPICO 5 — Webhooks Mercado Pago
+- [x] ÉPICO 6 — Google Sheets
 - [ ] ÉPICO 7 — Notificações
-- [ ] ÉPICO 8 — Observabilidade
+- [ ] ÉPICO 8 — Observabilidade Avançada
 
 ## Referências
 
