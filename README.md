@@ -2,6 +2,21 @@
 
 Sistema de Automação e Controle de Pagamentos PIX via WhatsApp com integração Mercado Pago.
 
+## 🚀 Migração para n8n
+
+**Este projeto está sendo migrado de FastAPI (Python) para n8n workflows.**
+
+### Por que n8n?
+- Interface visual para workflows
+- Integração nativa com WhatsApp, Mercado Pago, Google Sheets e PostgreSQL
+- Menor complexidade e mais fácil manutenção
+- Observabilidade e debugging visual
+
+### Versões Disponíveis
+
+- **n8n (atual)**: Workflows visuais no Render → [Documentação de Deploy](docs/N8N_DEPLOY.md)
+- **FastAPI (legado)**: Aplicação Python original → Ver branch `legacy-fastapi`
+
 ## Visão Geral
 
 Automatiza cobranças mensais via PIX utilizando:
@@ -13,41 +28,57 @@ Automatiza cobranças mensais via PIX utilizando:
 
 ## Tecnologias
 
+### Versão n8n (Atual)
+- **Automação**: n8n Workflows
+- **Banco de Dados**: PostgreSQL (Render)
+- **WhatsApp**: Meta Cloud API (nodes nativos)
+- **Pagamentos**: Mercado Pago PIX (HTTP Request)
+- **Planilha**: Google Sheets API (nodes nativos)
+- **Infraestrutura**: Render (Blueprint deploy)
+
+### Versão FastAPI (Legado)
 - **Backend**: Python 3.11 + FastAPI
 - **Banco de Dados**: PostgreSQL
-- **WhatsApp**: Meta Cloud API
-- **Pagamentos**: Mercado Pago PIX
-- **Planilha**: Google Sheets API
 - **Infraestrutura**: Docker + Docker Compose
 
 ## Estrutura do Projeto
 
 ```
 pix/
-├── src/
-│   ├── api/              # Endpoints da API
-│   ├── core/             # Configurações, middleware, logging
-│   ├── models/           # Modelos do banco de dados
-│   ├── schemas/          # Schemas Pydantic
-│   ├── services/         # Lógica de negócio
-│   ├── utils/            # Utilitários
-│   └── main.py           # Aplicação FastAPI
-├── tests/
-│   ├── unit/             # Testes unitários
-│   └── integration/      # Testes de integração
-├── scripts/              # Scripts auxiliares
-├── docker-compose.yml
-├── Dockerfile
-├── pyproject.toml
-└── requirements.txt
+├── n8n/
+│   └── init-db.sql       # Schema do banco de dados
+├── docs/
+│   ├── PRD.md            # Product Requirements Document
+│   ├── N8N_DEPLOY.md     # Guia de deploy no Render
+│   ├── N8N_MIGRATION.md  # Documentação da migração
+│   ├── WHATSAPP_SETUP.md
+│   ├── MERCADOPAGO_SETUP.md
+│   └── GOOGLE_SHEETS_SETUP.md
+├── src/                  # [LEGADO] Código FastAPI
+├── render.yaml           # Configuração Render Blueprint
+├── .env.n8n.example      # Exemplo de variáveis de ambiente
+└── README.md
 ```
 
-## Pré-requisitos
+## Quick Start (n8n no Render)
 
-- Python 3.11+
-- Docker e Docker Compose
+### Pré-requisitos
+
+- Conta Render (gratuita)
+- Conta GitHub
 - Conta Meta Developer (WhatsApp Cloud API)
 - Conta Mercado Pago Developer
+- Conta Google Cloud (Sheets API)
+
+### Deploy em 5 passos
+
+1. **Fork este repositório**
+2. **Deploy no Render**: Dashboard → New → Blueprint → Conectar repo
+3. **Configurar variáveis**: Environment → Adicionar tokens (WhatsApp, Mercado Pago, Google Sheets)
+4. **Criar workflows**: Usar MCP n8n-mcp para criar workflows automaticamente
+5. **Configurar webhooks**: WhatsApp e Mercado Pago apontando para seu app Render
+
+📖 **Guia completo**: [docs/N8N_DEPLOY.md](docs/N8N_DEPLOY.md)
 - Conta Google Cloud (Sheets API)
 
 ## Instalação
